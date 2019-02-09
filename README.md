@@ -3,11 +3,12 @@ Yet another implementatoion of CompSci algorithms. Must be suitable for competit
 
 NB!: You must clone the project with `git clone --recurse-submodules ...` to fetch gooletest submodule
 
-Requires `cmake` and `doxygen` to build
+Requires `cmake` version 3.8+ and `doxygen` to build
 
 How to build:
 
 ```shell
+mkdir build
 cd build
 cmake ..
 cmake --build . -- -j
