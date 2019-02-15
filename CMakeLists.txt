@@ -21,7 +21,7 @@ find_package(Doxygen)
 if (DOXYGEN_FOUND)
     # need to render Doxyfile during the build    
     configure_file(${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile @ONLY)
-    add_custom_target(doc ALL
+    add_custom_target(doc
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMENT "Generating API documentation with Doxygen"
@@ -45,6 +45,10 @@ target_link_libraries(binomial_test gtest gtest_main)
 add_executable(par_test test/par_test.cpp include/par.hpp)
 target_link_libraries(par_test alg gtest gtest_main)
 
+add_executable(heap_test test/heap_test.cpp include/heap.hpp)
+target_link_libraries(heap_test gtest gtest_main)
+
 add_test(NAME segtree_test COMMAND segtree_test)
 add_test(NAME binomial_test COMMAND binomial_test)
 add_test(NAME par_test COMMAND par_test)
+add_test(NAME heap_test COMMAND heap_test)
