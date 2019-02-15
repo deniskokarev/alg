@@ -48,7 +48,11 @@ target_link_libraries(par_test alg gtest gtest_main)
 add_executable(heap_test test/heap_test.cpp include/heap.hpp)
 target_link_libraries(heap_test gtest gtest_main)
 
+add_executable(ilog_test test/ilog_test.cpp include/ilog.hpp)
+target_link_libraries(ilog_test gtest gtest_main)
+
 add_test(NAME segtree_test COMMAND segtree_test)
 add_test(NAME binomial_test COMMAND binomial_test)
 add_test(NAME par_test COMMAND par_test)
 add_test(NAME heap_test COMMAND heap_test)
+add_test(NAME ilog_test COMMAND ilog_test)
