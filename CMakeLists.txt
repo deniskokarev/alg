@@ -51,8 +51,12 @@ target_link_libraries(heap_test gtest gtest_main)
 add_executable(ilog_test test/ilog_test.cpp include/ilog.hpp)
 target_link_libraries(ilog_test gtest gtest_main)
 
+add_executable(mat_test test/mat_test.cpp include/mat.hpp include/hperm.hpp)
+target_link_libraries(mat_test gtest gtest_main)
+
 add_test(NAME segtree_test COMMAND segtree_test)
 add_test(NAME binomial_test COMMAND binomial_test)
 add_test(NAME par_test COMMAND par_test)
 add_test(NAME heap_test COMMAND heap_test)
 add_test(NAME ilog_test COMMAND ilog_test)
+add_test(NAME mat_test COMMAND mat_test)
