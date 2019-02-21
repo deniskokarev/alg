@@ -129,3 +129,87 @@ TEST(AddSegTree, DownIncHalfSum) {
 	}
 }
 
+// need to init our int with 1
+// inc is mul
+struct M {
+	int m;
+	M(int m):m(m){}
+	M():M(1){}
+	void operator+=(const M &other) {
+		m *= other.m;
+	}
+};
+
+struct FoldSumMul {
+	int64_t operator()(int64_t sm, M mul, int lvl) const {
+		return sm * mul.m;
+	}
+	int64_t operator()(int64_t sm_l, int64_t sm_r) const {
+		return sm_l + sm_r;
+	}
+};
+
+TEST(LazySegTree, TestBasicSum) {
+	const int sz = 8;
+	LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+	for (int i=0; i<sz; i++)
+		lzt[i] = i+1;
+	lzt.rebuild();
+	EXPECT_EQ(lzt(0, sz), sz*(sz+1)/2);
+}
+
+TEST(LazySegTree, BasicMul16) {
+	const int sz = 16;
+	LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+	for (int i=0; i<sz; i++)
+		lzt[i] = 1;
+	lzt.rebuild();
+	lzt.inc(0, sz, 2);
+	EXPECT_EQ(lzt(0, sz), 2*sz);
+}
+
+TEST(LazySegTree, BasicMul7) {
+	const int sz = 7;
+	LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+	for (int i=0; i<sz; i++)
+		lzt[i] = 1;
+	lzt.rebuild();
+	lzt.inc(0, sz, M(2));
+	EXPECT_EQ(lzt(0, sz), 2*sz);
+}
+
+TEST(LazySegTree, MulAll) {
+	for (int sz=1; sz<128; sz++) {
+		LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+		for (int i=0; i<sz; i++)
+			lzt[i] = 3;
+		lzt.rebuild();
+		lzt.inc(0, sz, M(2));
+		EXPECT_EQ(lzt(0, sz), 2*3*sz);
+	}
+}
+
+TEST(LazySegTree, MulHalfs) {
+	for (int sz=1; sz<128; sz++) {
+		LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+		for (int i=0; i<sz; i++)
+			lzt[i] = 3;
+		lzt.rebuild();
+		int h = sz/2;
+		lzt.inc(0, h, M(2));
+		lzt.inc(h, sz, M(2));
+		EXPECT_EQ(lzt(0, sz), 2*3*sz);
+	}
+}
+
+TEST(LazySegTree, MulLeft) {
+	for (int sz=1; sz<128; sz++) {
+		LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+		for (int i=0; i<sz; i++)
+			lzt[i] = 3;
+		lzt.rebuild();
+		int h = sz/2;
+		lzt.inc(0, h, M(2));
+		EXPECT_EQ(lzt(0, sz), 2*3*h + 3*(sz-h));
+	}
+}
