@@ -318,8 +318,10 @@ public:
 				e >>= 1;
 			}
 			return FoldOp()(vb, ve);
-		} else {
+		} else if (e-b == 1) {
 			return tree[b];
+		} else {
+			return value_type();
 		}
 	}
 };

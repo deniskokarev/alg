@@ -1,6 +1,7 @@
 #include "segtree.hpp"
 #include "gtest/gtest.h"
 #include <numeric>
+#include <random>
 
 TEST(SegTree, Sum0) {
 	SegTree<int> sum({1,2,3});
@@ -211,5 +212,52 @@ TEST(LazySegTree, MulLeft) {
 		int h = sz/2;
 		lzt.inc(0, h, M(2));
 		EXPECT_EQ(lzt(0, sz), 2*3*h + 3*(sz-h));
+	}
+}
+
+TEST(LazySegTree, MulRand16) {
+	int sz = 16;
+	std::mt19937 rnd(1);
+	std::vector<int64_t> vv(sz);
+	LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+	for (int i=0; i<sz; i++)
+		vv[i] = lzt[i] = 1;
+	lzt.rebuild();
+	EXPECT_EQ(lzt(0, sz), std::accumulate(vv.begin(), vv.end(), 0LL));
+	std::vector<M> mul({2, 3, 5, 7, 11, 13});
+	for (int i=0; i<10; i++) {
+		int f = rnd() % sz;
+		int t = std::min(sz, f + int(rnd() % sz));
+		int mi = rnd() % mul.size();
+		lzt.inc(f, t, mul[mi]);
+		for (int j=f; j<t; j++)
+			vv[j] *= mul[mi].m;
+		int64_t asum = std::accumulate(vv.begin(), vv.end(), 0LL);
+		EXPECT_EQ(lzt(0, sz), asum);
+	}
+}
+
+TEST(LazySegTree, MulRandRand) {
+	std::mt19937 rnd(1);
+	for (int sz=1; sz<128; sz++) {
+		std::vector<int64_t> vv(sz);
+		LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+		for (int i=0; i<sz; i++)
+			vv[i] = lzt[i] = 1;
+		lzt.rebuild();
+		EXPECT_EQ(lzt(0, sz), std::accumulate(vv.begin(), vv.end(), 0LL));
+		std::vector<M> mul({2, 3, 5, 7, 11, 13});
+		for (int i=0; i<10; i++) {
+			int f = rnd() % sz;
+			int t = std::min(sz, f + int(rnd() % sz));
+			int mi = rnd() % mul.size();
+			lzt.inc(f, t, mul[mi]);
+			for (int j=f; j<t; j++)
+				vv[j] *= mul[mi].m;
+			f = rnd() % sz;
+			t = std::min(sz, f + int(rnd() % sz));
+			int64_t asum = std::accumulate(vv.begin()+f, vv.begin()+t, 0LL);
+			EXPECT_EQ(lzt(f, t), asum);
+		}
 	}
 }
