@@ -52,15 +52,10 @@ public:
 	 * @param v
 	 */
 	void set(int pos, const value_type &v) {
-		int node = sz+pos;
-		tree[node] = v;
-		node >>= 1;
-		if (((node<<1)|1) < sz+sz)
-			tree[node] = FoldOp()(tree[node<<1], tree[(node<<1)|1]);
-		else
-			tree[node] = tree[node<<1];
-		for (node=node>>1; node>0; node >>= 1)
-			tree[node] = FoldOp()(tree[node<<1], tree[(node<<1)|1]);
+		pos += sz;
+		tree[pos] = v;
+		for (pos=pos>>1; pos>0; pos >>= 1)
+			tree[pos] = FoldOp()(tree[pos<<1], tree[(pos<<1)|1]);
 	}
 
 	/**
@@ -164,9 +159,9 @@ public:
 	 * Get the value at position pos in O(logN)
 	 */
 	const value_type &get(int pos) {
-		int node = sz+pos;
-		propagate_inc(node);
-		return tree[node];
+		pos += sz;
+		propagate_inc(pos);
+		return tree[pos];
 	}
 	
 	/**
@@ -295,9 +290,9 @@ public:
 	 * Compute and get the value at position pos in O(logN)
 	 */
 	const value_type &get(int pos) {
-		int node = sz+pos;
-		propagate_inc(node);
-		return tree[node];
+		pos += sz;
+		propagate_inc(pos);
+		return tree[pos];
 	}
 
 	/**
