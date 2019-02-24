@@ -3,8 +3,8 @@
 #include <numeric>
 #include <random>
 
-TEST(SegTree, Sum0) {
-	SegTree<int> sum({1,2,3});
+TEST(BotUpSegTree, Sum0) {
+	BotUpSegTree<> sum({1,2,3});
 	EXPECT_EQ(sum(), 6);
 	sum.set(0, 2);
 	sum.set(1, 3);
@@ -12,9 +12,9 @@ TEST(SegTree, Sum0) {
 	EXPECT_EQ(sum(), 9);
 }
 
-TEST(SegTree, Sum) {
+TEST(BotUpSegTree, Sum) {
 	for (int sz=1; sz<128; sz++) {
-		SegTree<int> sum(sz);
+		BotUpSegTree<> sum(sz);
 		for (int i=0; i<sz; i++)
 			sum.set(i, i);
 		for (int w=1; w<sz; w++) {
@@ -26,9 +26,25 @@ TEST(SegTree, Sum) {
 	}
 }
 
-TEST(SegTree, Max) {
+// helper class to perform max() on +
+template<class N>struct Mx {
+	using value_type = N;
+	N i;
+	Mx(N i):i(i){}
+	Mx():Mx(0){}
+	Mx operator+(const Mx &o) const {
+		Mx res(*this);
+		res.i = std::max(i, o.i);
+		return res;
+	}
+	operator value_type() const {
+		return i;
+	}
+};
+
+TEST(BotUpSegTree, Max) {
 	for (int sz=1; sz<128; sz++) {
-		SegTree<int> max(sz, [](int a, int b){return (a>b)?a:b;});
+		BotUpSegTree<Mx<int>> max(sz);
 		for (int i=0; i<sz; i++)
 			max.set(i, i);
 		for (int w=1; w<sz; w++) {
@@ -40,17 +56,17 @@ TEST(SegTree, Max) {
 	}
 }
 
-TEST(AddSegTree, Add1) {
-	AddSegTree<int> sum({1,2,3});
-	sum.add_each(0, 3, 1);
+TEST(TopDownSegTree, TopDown1) {
+	TopDownSegTree<int> sum({1,2,3});
+	sum.inc(0, 3, 1);
 	EXPECT_EQ(std::accumulate(sum.begin(), sum.end(), 0), 9);
 }
 
-TEST(AddSegTree, UpIncStat) {
+TEST(TopDownSegTree, UpIncStat) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=0; i<sz; i++)
-			sum.add_each(i, sz, 1);
+			sum.inc(i, sz, 1);
 		std::vector<int> res(sz);
 		for (int i=0; i<sz; i++)
 			res[i] = i+1;
@@ -58,11 +74,11 @@ TEST(AddSegTree, UpIncStat) {
 	}
 }
 
-TEST(AddSegTree, UpIncDyn) {
+TEST(TopDownSegTree, UpIncDyn) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=0; i<sz; i++)
-			sum.add_each(i, sz, 1);
+			sum.inc(i, sz, 1);
 		std::vector<int> ans(sz);
 		for (int i=0; i<sz; i++)
 			ans[i] = sum.get(i);
@@ -73,11 +89,11 @@ TEST(AddSegTree, UpIncDyn) {
 	}
 }
 
-TEST(AddSegTree, DownIncStat) {
+TEST(TopDownSegTree, DownIncStat) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=1; i<sz; i++)
-			sum.add_each(0, i, 1);
+			sum.inc(0, i, 1);
 		std::vector<int> res(sz);
 		for (int i=0; i<sz; i++)
 			res[i] = sz-i-1;
@@ -85,11 +101,11 @@ TEST(AddSegTree, DownIncStat) {
 	}
 }
 
-TEST(AddSegTree, DownIncDyn) {
+TEST(TopDownSegTree, DownIncDyn) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=1; i<sz; i++)
-			sum.add_each(0, i, 1);
+			sum.inc(0, i, 1);
 		std::vector<int> ans(sz);
 		for (int i=0; i<sz; i++)
 			ans[i] = sum.get(i);
@@ -100,11 +116,11 @@ TEST(AddSegTree, DownIncDyn) {
 	}
 }
 
-TEST(AddSegTree, UpIncHalfSum) {
+TEST(TopDownSegTree, UpIncHalfSum) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=0; i<=sz/2; i++)
-			sum.add_each(i, sz-i, 1);
+			sum.inc(i, sz-i, 1);
 		int ans = 0;
 		for (int i=0; i<sz; i++)
 			ans += sum.get(i);
@@ -115,11 +131,11 @@ TEST(AddSegTree, UpIncHalfSum) {
 	}
 }
 
-TEST(AddSegTree, DownIncHalfSum) {
+TEST(TopDownSegTree, DownIncHalfSum) {
 	for (int sz=1; sz<128; sz++) {
-		AddSegTree<int> sum(sz);
+		TopDownSegTree<int> sum(sz);
 		for (int i=sz/2; i>=0; i--)
-			sum.add_each(i, sz-i, 1);
+			sum.inc(i, sz-i, 1);
 		int ans = 0;
 		for (int i=sz-1; i>=0; i--)
 			ans += sum.get(i);

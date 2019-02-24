@@ -6,26 +6,24 @@
 #include <cmath>
 
 /**
- * Simple Segment tree on a vector with custom "fold" operation.
+ * Simple bottom-up Segment tree on a vector with custom "fold" operation.
  * Supports setting a value at a position and "folding" values on a range
- * Typically, folding would be operator+() or max()
+ * Typically, folding would be std::plus
  * O(2*n) space
  * set() - O(NlogN) time
  * fold() - O(NlogN) time
  * @author Denis Kokarev
  */
-template<class ValueType=int> class SegTree {
+template<class ValueType=int, class FoldOp=std::plus<ValueType>> class BotUpSegTree {
 	using value_type = ValueType;
-	using FOLD_OP = std::function<value_type(const value_type &, const value_type &)>;
 	int sz;
 	std::vector<value_type> tree; // where we keep all values, first sz elements are aggreagates
-	FOLD_OP fold; // "fold" operator to be executed on our interval
 	/**
 	 * If you touched values directly, you must perform rebuild()
 	 */
 	void rebuild() {
 		for (int i=sz+sz-1; i>1; i-=2)
-			tree[i>>1] = fold(tree[i-1], tree[i]);
+			tree[i>>1] = FoldOp()(tree[i-1], tree[i]);
 	}
 public:
 	/**
@@ -34,7 +32,7 @@ public:
 	 * @param _sz - maximum size
 	 * @param _fold  - custom fold operator - default std::plus
 	 */
-	SegTree(int _sz, FOLD_OP _fold=std::plus<value_type>()):sz(_sz),tree(sz+sz),fold(_fold) {
+	BotUpSegTree(int sz):sz(sz),tree(sz+sz) {
 	}
 
 	/**
@@ -43,7 +41,7 @@ public:
 	 * @param list - list of given values
 	 * @param _fold  - custom fold operator - default std::plus
 	 */
-	SegTree(const std::initializer_list<value_type> &list, FOLD_OP _fold=std::plus<value_type>()):SegTree(list.size(), _fold) {
+	BotUpSegTree(const std::initializer_list<value_type> &list):BotUpSegTree(list.size()) {
 		std::copy(list.begin(), list.end(), tree.begin()+sz);
 		rebuild();
 	}
@@ -58,11 +56,11 @@ public:
 		tree[node] = v;
 		node >>= 1;
 		if (((node<<1)|1) < sz+sz)
-			tree[node] = fold(tree[node<<1], tree[(node<<1)|1]);
+			tree[node] = FoldOp()(tree[node<<1], tree[(node<<1)|1]);
 		else
 			tree[node] = tree[node<<1];
 		for (node=node>>1; node>0; node >>= 1)
-			tree[node] = fold(tree[node<<1], tree[(node<<1)|1]);
+			tree[node] = FoldOp()(tree[node<<1], tree[(node<<1)|1]);
 	}
 
 	/**
@@ -75,49 +73,50 @@ public:
 		b += sz;
 		e += sz;
 		if (e-b > 1) {
-			value_type vb = tree[b++];
-			value_type ve = tree[--e];
+			value_type vb = value_type();
+			value_type ve = value_type();
 			while (b < e) {
 				if (b&1)
-					vb = fold(vb, tree[b++]);
+					vb = FoldOp()(vb, tree[b++]);
 				if (e&1)
-					ve = fold(tree[--e], ve);
+					ve = FoldOp()(tree[--e], ve);
 				b >>= 1;
 				e >>= 1;
 			}
-			return fold(vb, ve);
-		} else {
+			return FoldOp()(vb, ve);
+		} else if (e-b == 1) {
 			return tree[b];
+		} else {
+			return value_type();
 		}
 	}
-	
 	/**
-	 * Perform interval folding. Runs in O(logN)
+	 * Perform entire interval folding
 	 * @return fold(tree[b], fold(tree[b+1], fold(tree[b+2], ... fold(tree[e-2], fold(tree[e-1])...)))
 	 */
-	value_type operator()() const {
+	value_type operator()() {
 		return operator()(0, sz);
 	}
 };
 
 /**
- * Segment tree to perform "lazy" increments on all values in the open interval [b, e)
+ * Segment tree to perform range increments on all values in the open interval [b, e)
+ * Then you can gen any element in O(logN)
+ * or recompute all elements in O(N)
  */
-template<class ValueType=int> class AddSegTree {
+template<class ValueType=int> class TopDownSegTree {
 	using value_type = ValueType;
-	using INC_OP = std::function<void(value_type &, const value_type &)>;
 	int sz;
 	int l2;
 	std::vector<value_type> tree; // where we keep all values (first sz elements are aggreagates)
-	INC_OP inc; // "increment" operator to be executed during increments
 	/**
 	 * Propagate increments down to a specific element in O(logN)
 	 */
 	void propagate_inc(int pos) {
 		for (int l=l2; l>0; l--) {
 			int p = pos >> l;
-			inc(tree[p<<1], tree[p]);
-			inc(tree[(p<<1)|1], tree[p]);
+			tree[p<<1] += tree[p];
+			tree[(p<<1)|1] += tree[p];
 			tree[p] = value_type();
 		}
 	}
@@ -126,25 +125,21 @@ template<class ValueType=int> class AddSegTree {
 	 */
 	void propagate_inc() {
 		for (int i=1; i < sz; i++) {
-			inc(tree[i<<1], tree[i]);
-			inc(tree[(i<<1)|1], tree[i]);
+			tree[i<<1] += tree[i];
+			tree[(i<<1)|1] += tree[i];
 			tree[i] = value_type();
 		}
 	}
-	static void default_inc(value_type &a, const value_type &b) {
-		a += b;
-	};
 public:
 	/**
-	 * Create segment tree with given size and custom inc operator
+	 * Create segment tree with given size
 	 * Upon creation all values will be zeros
-	 * @param _sz - maximum size
-	 * @param _add  - custom add operator - default std::plus
+	 * @param sz - maximum size
 	 */
-	AddSegTree(int _sz, INC_OP _inc=default_inc):sz(_sz),l2(floor(log2(sz))),tree(sz+sz),inc(_inc) {
+	TopDownSegTree(int sz):sz(sz),l2(floor(log2(sz))),tree(sz+sz) {
 	}
 
-	AddSegTree(const std::initializer_list<value_type> &list, INC_OP _inc=default_inc):AddSegTree(list.size(), _inc) {
+	TopDownSegTree(const std::initializer_list<value_type> &list):TopDownSegTree(list.size()) {
 		std::copy(list.begin(), list.end(), tree.begin()+sz);
 	}
 	
@@ -152,27 +147,19 @@ public:
 	 * Perform "lazy" increment by v on all values in the open interval [b, e)
 	 * Runs in O(logN)
 	 */ 
-	void add_each(int b, int e, const value_type &v) {
+	void inc(int b, int e, const value_type &v) {
 		b += sz;
 		e += sz;
 		while (b < e) {
 			if (b&1)
-				inc(tree[b++], v);
+				tree[b++] += v;
 			if (e&1)
-				inc(tree[--e], v);
+				tree[--e] += v;
 			b >>= 1;
 			e >>= 1;
 		}
 	}
 
-	/**
-	 * Perform "lazy" increment by v to all values
-	 * Runs in O(logN)
-	 */ 
-	void add_each(const value_type &v) {
-		add_each(0, sz, v);
-	}
-	
 	/**
 	 * Get the value at position pos in O(logN)
 	 */
@@ -183,8 +170,8 @@ public:
 	}
 	
 	/**
-	 * Or if want to iterate all recomputed values
-	 * Needs O(n) to precompute
+	 * Or if want to recompute all values and iteratite them
+	 * Needs O(N) to precompute
 	 */
 	typename std::vector<value_type>::const_iterator begin() {
 		propagate_inc();
@@ -204,7 +191,6 @@ public:
  * All operations run in O(logN)
  */
 template<class ValueType, class LazyType, class FoldOp> class LazySegTree {
-public: // DEBUG
 	using value_type = ValueType;
 	using lazy_type = LazyType;
 	int sz;
@@ -227,7 +213,7 @@ public: // DEBUG
 	 * Propagate increments down to a specific element in O(logN)
 	 */
 	void propagate_inc(int pos) {
-		for (int l=l2; l>0; l--) {
+		for (int l=l2; l>1; l--) {
 			int p = pos >> l;
 			int c1 = p << 1;
 			int c2 = c1 + 1;
@@ -237,6 +223,13 @@ public: // DEBUG
 			tree[c2] = FoldOp()(tree[c2], lazy[p], l-1);
 			lazy[p] = lazy_type();
 		}
+		int l = 1;
+		int p = pos >> l;
+		int c1 = p << 1;
+		int c2 = c1 + 1;
+		tree[c1] = FoldOp()(tree[c1], lazy[p], l-1);
+		tree[c2] = FoldOp()(tree[c2], lazy[p], l-1);
+		lazy[p] = lazy_type();
 	}
 public:
 	/**
@@ -244,7 +237,7 @@ public:
 	 * Upon creation all values will be zeros
 	 * @param sz - maximum size
 	 */
-	LazySegTree(int _sz):sz(_sz),l2(floor(log2(sz))),tree(sz+sz+1),lazy(sz+sz+1) {
+	LazySegTree(int _sz):sz(_sz),l2(floor(log2(sz))),tree(sz+sz),lazy(sz) {
 	}
 
 	value_type &operator[](int p) {
@@ -266,6 +259,19 @@ public:
 		int rb = b;
 		int re = e;
 		int level = 0;
+		if (b < e) {
+			if (b&1) {
+				tree[b] = FoldOp()(tree[b], v, level);
+				b++;
+			}
+			if (e&1) {
+				--e;
+				tree[e] = FoldOp()(tree[e], v, level);
+			}
+			b >>= 1;
+			e >>= 1;
+			level++;
+		}
 		while (b < e) {
 			if (b&1) {
 				tree[b] = FoldOp()(tree[b], v, level);
