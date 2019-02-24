@@ -296,6 +296,16 @@ public:
 	}
 
 	/**
+	 * Set an individual value at the position pos
+	 */
+	void set(int pos, const value_type &v) {
+		pos += sz;
+		propagate_inc(pos);
+		tree[pos] = v;
+		rebuild_pos(pos);
+	}
+
+	/**
 	 * Perform interval folding on open-ended [b, e) segment. Runs in O(logN)
 	 * Folding is left-associative
 	 * @param b - begin - first element inclusive

@@ -277,3 +277,32 @@ TEST(LazySegTree, MulRandRand) {
 		}
 	}
 }
+
+TEST(LazySegTree, MulRandRandAndSet) {
+	std::mt19937 rnd(1);
+	for (int sz=1; sz<128; sz++) {
+		std::vector<int64_t> vv(sz);
+		LazySegTree<int64_t, M, FoldSumMul> lzt(sz);
+		for (int i=0; i<sz; i++)
+			vv[i] = lzt[i] = 1;
+		lzt.rebuild();
+		EXPECT_EQ(lzt(0, sz), std::accumulate(vv.begin(), vv.end(), 0LL));
+		std::vector<M> mul({2, 3, 5, 7, 11, 13});
+		for (int i=0; i<10; i++) {
+			int f = rnd() % sz;
+			int t = std::min(sz, f + int(rnd() % sz));
+			int mi = rnd() % mul.size();
+			lzt.inc(f, t, mul[mi]);
+			for (int j=f; j<t; j++)
+				vv[j] *= mul[mi].m;
+			int64_t asum = std::accumulate(vv.begin(), vv.end(), 0LL);
+			EXPECT_EQ(lzt(0, sz), asum);
+			int pos = rnd() % sz;
+			int64_t v = mul[rnd()%mul.size()].m;
+			lzt.set(pos, v);
+			vv[pos] = v;
+			asum = std::accumulate(vv.begin(), vv.end(), 0LL);
+			EXPECT_EQ(lzt(0, sz), asum);
+		}
+	}
+}
