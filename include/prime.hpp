@@ -3,6 +3,7 @@
 
 #include <cinttypes>
 #include <utility>
+#include <vector>
 
 /**
  * Naive prime number factorization in O(sqrt(N))
@@ -26,5 +27,10 @@ int prime_factors_all(uint64_t n, uint64_t p[]);
  */
 int prime_factors_uniq(uint64_t n, std::pair<uint64_t,int> p[]);
 
+/**
+ * Render [0..n) vector of non-prime=false and prime=true indicators
+ * for first n numbers
+ */
+std::vector<bool> prime_sieve(int n);
 
 #endif // __PRIME_HH__
