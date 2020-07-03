@@ -15,6 +15,7 @@ add_library(yalg
 	STATIC
 	src/par.cpp
 	src/prime.cpp
+	src/prefix.cpp
 )
 
 # optionally build doxygen docs
@@ -58,6 +59,9 @@ target_link_libraries(mat_test gtest gtest_main)
 add_executable(prime_test test/prime_test.cpp include/prime.hpp)
 target_link_libraries(prime_test yalg gtest gtest_main)
 
+add_executable(prefix_test test/prefix_test.cpp include/prefix.hpp)
+target_link_libraries(prefix_test yalg gtest gtest_main)
+
 add_test(NAME segtree_test COMMAND segtree_test)
 add_test(NAME binomial_test COMMAND binomial_test)
 add_test(NAME par_test COMMAND par_test)
@@ -65,3 +69,4 @@ add_test(NAME heap_test COMMAND heap_test)
 add_test(NAME ilog_test COMMAND ilog_test)
 add_test(NAME mat_test COMMAND mat_test)
 add_test(NAME prime_test COMMAND prime_test)
+add_test(NAME prefix_test COMMAND prefix_test)
