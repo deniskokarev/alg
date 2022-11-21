@@ -23,6 +23,8 @@ template<typename N> struct Mat {
 	typename VEC::const_iterator operator[](int r) const {
 		return vv.cbegin()+r*cols;
 	}
+	// O(n!) complexity, but with only O(n*sizeof(int)) extra mem on stack
+	// and no div operator required
 	N det() const {
 		assert(rows == cols);
 		const Mat &m = *this;
