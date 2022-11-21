@@ -1,6 +1,20 @@
 #include "mat.hpp"
 #include "gtest/gtest.h"
 
+TEST(Mat, Adj1) {
+	const std::vector<int> values {3};
+	auto adj = Mat<int>(1, 1, values).adj();
+	EXPECT_EQ(adj[0][0], 1);
+}
+
+TEST(Mat, Adj2) {
+	const std::vector<int> values {1,2,3,4};
+	auto adj = Mat<int>(2, 2, values).adj();
+	const std::vector<int> exp_values {4,-2,-3,1};
+	auto exp = Mat<int>(2, 2, values).adj();
+	EXPECT_EQ(adj, exp);
+}
+
 TEST(Mat, Det) {
 	const int rs = 3, cs = 3;
 	const int values[rs][cs] = {

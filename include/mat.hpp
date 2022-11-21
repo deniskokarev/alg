@@ -14,6 +14,7 @@ template<typename N> struct Mat {
 	int rows, cols;
 	VEC vv;
 	Mat(int _r, int _c):rows(_r),cols(_c),vv(rows*cols){}
+	Mat(int _r, int _c, const VEC &_vv):rows(_r),cols(_c),vv(_vv){}
 	Mat(const Mat &m):rows(m.rows),cols(m.cols),vv(m.vv){}
 	Mat(Mat &&m):rows(m.rows),cols(m.cols),vv(std::move(m.vv)){}
 	typename VEC::iterator operator[](int r) {
@@ -57,16 +58,22 @@ template<typename N> struct Mat {
 	}
 	Mat adj() const {
 		assert(rows == cols);
-		Mat a(rows, cols);
-		for (int r=0; r<rows; r++) {
-			int sign = ((r&1) == 0) ? 1:-1;
-			for (int c=0; c<cols; c++) {
-				Mat mr = mat_minor(r, c);
-				a[c][r] = mr.det()*sign;
-				sign *= -1;
+		if (rows < 2) {
+			Mat a(1, 1);
+			a[0][0] = 1;
+			return a;
+		} else {
+			Mat a(rows, cols);
+			for (int r=0; r<rows; r++) {
+				int sign = ((r&1) == 0) ? 1:-1;
+				for (int c=0; c<cols; c++) {
+					Mat mr = mat_minor(r, c);
+					a[c][r] = mr.det()*sign;
+					sign *= -1;
+				}
 			}
+			return a;
 		}
-		return a;
 	}
 	Mat mul(const Mat &b) const {
 		const Mat &a = *this;
@@ -112,6 +119,16 @@ template<typename N> struct Mat {
 		Mat<N> res(*this);
 		res += b;
 		return res;
+	}
+	bool operator==(const Mat<N> &b) const {
+		if (rows == b.rows && cols == b.cols) {
+			for (int i=0; i<rows*cols; i++)
+				if (vv[i] != b.vv[i])
+					return false;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	// for 1d vectors
 	N length_squared() const {
