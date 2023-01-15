@@ -19,6 +19,7 @@ add_library(yalg
 )
 
 # optionally build doxygen docs
+set(DOXYGEN_EXECUTABLE "") # hmm, something's wrong with FindDoxygen module
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
     # need to render Doxyfile during the build    
@@ -74,3 +75,20 @@ add_test(NAME mat_test COMMAND mat_test)
 add_test(NAME prime_test COMMAND prime_test)
 add_test(NAME prefix_test COMMAND prefix_test)
 add_test(NAME nth_element_test COMMAND nth_element_test)
+
+# explicit tests <- exe build dependency allows running test target right away
+add_test(NAME building_all_tests
+  COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" -- -j)
+set_tests_properties(building_all_tests PROPERTIES FIXTURES_SETUP bld)
+set_tests_properties(
+  segtree_test
+  binomial_test
+  par_test
+  heap_test
+  ilog_test
+  mat_test
+  prime_test
+  prefix_test
+  nth_element_test
+  PROPERTIES FIXTURES_REQUIRED bld
+)
