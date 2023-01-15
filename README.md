@@ -18,3 +18,5 @@ cmake --build . -- -j
 cmake --build . --target test
 # heap_test may fail performance test on debug config
 ```
+
+**NB**: after upgrading XCode, cmake may start acting up. The solution is to `rm -rf build` dir and recreate.
