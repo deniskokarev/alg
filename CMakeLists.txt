@@ -76,7 +76,7 @@ add_test(NAME prime_test COMMAND prime_test)
 add_test(NAME prefix_test COMMAND prefix_test)
 add_test(NAME nth_element_test COMMAND nth_element_test)
 
-# explicit tests <- exe build dependency allows running test target right away
+# explicit tests <- exe build dependency allows running 'ctest' right away
 add_test(NAME building_all_tests
   COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}" -- -j)
 set_tests_properties(building_all_tests PROPERTIES FIXTURES_SETUP bld)
