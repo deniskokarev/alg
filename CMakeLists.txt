@@ -39,31 +39,31 @@ enable_testing()
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 # all tests
-add_executable(segtree_test test/segtree_test.cpp include/segtree.hpp)
+add_executable(segtree_test test/segtree_test.cpp)
 target_link_libraries(segtree_test gtest gtest_main)
 
-add_executable(binomial_test test/binomial_test.cpp include/binomial.hpp)
+add_executable(binomial_test test/binomial_test.cpp)
 target_link_libraries(binomial_test gtest gtest_main)
 
-add_executable(par_test test/par_test.cpp include/par.hpp)
+add_executable(par_test test/par_test.cpp)
 target_link_libraries(par_test yalg gtest gtest_main)
 
-add_executable(heap_test test/heap_test.cpp include/heap.hpp)
+add_executable(heap_test test/heap_test.cpp)
 target_link_libraries(heap_test gtest gtest_main)
 
-add_executable(ilog_test test/ilog_test.cpp include/ilog.hpp)
+add_executable(ilog_test test/ilog_test.cpp)
 target_link_libraries(ilog_test gtest gtest_main)
 
-add_executable(mat_test test/mat_test.cpp include/mat.hpp include/hperm.hpp)
+add_executable(mat_test test/mat_test.cpp)
 target_link_libraries(mat_test gtest gtest_main)
 
-add_executable(prime_test test/prime_test.cpp include/prime.hpp)
+add_executable(prime_test test/prime_test.cpp)
 target_link_libraries(prime_test yalg gtest gtest_main)
 
-add_executable(prefix_test test/prefix_test.cpp include/prefix.hpp)
+add_executable(prefix_test test/prefix_test.cpp)
 target_link_libraries(prefix_test yalg gtest gtest_main)
 
-add_executable(nth_element_test test/nth_element_test.cpp include/nth_element.hpp)
+add_executable(nth_element_test test/nth_element_test.cpp)
 target_link_libraries(nth_element_test yalg gtest gtest_main)
 
 add_test(NAME segtree_test COMMAND segtree_test)
